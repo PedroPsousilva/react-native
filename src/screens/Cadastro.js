@@ -9,9 +9,11 @@ import {
   Button
 } from "react-native";
 import api from "../axios/axios";
+import { useNavigation } from "@react-navigation/native";
 
 
-export default function Cadastro({navigation}) {
+
+export default function Cadastro() {
   const [user, setUser] = useState({
     name:"",
     email: "",
@@ -19,6 +21,8 @@ export default function Cadastro({navigation}) {
     cpf:"",
     data_nascimento:"",
   });
+
+  const navigation = useNavigation();
 
   async function handleCadastro() {
     await api.postCadastro(user).then(
