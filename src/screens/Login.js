@@ -9,11 +9,13 @@ import {
   Button,
 } from "react-native";
 import api from "../axios/axios";
+import{Ionicons} from '@expo/vector-icons'
 
 export default function Login({ navigation }) {
   const [user, setUser] = useState({
     email: "",
     password: "",
+    showPassword:false
   });
 
   async function handleLogin() {
@@ -39,14 +41,21 @@ export default function Login({ navigation }) {
           setUser({ ...user, email: value });
         }}
       />
+      <View style={styles.passwordContainer}>
       <TextInput
-        style={styles.input}
+
+        style={styles.passwordInput}
         placeholder="Senha"
         value={user.password}
+        secureTextEntry={user.showPassword}
         onChangeText={(value) => {
           setUser({ ...user, password: value });
         }}
       />
+      <TouchableOpacity onPress={()=> setUser({...user,showPassword: !user.showPassword})}>
+        <Ionicons name= {user.showPassword?"eye-off":"eye"} size={24} color="gray"/>
+      </TouchableOpacity>
+      </View>
       <TouchableOpacity onPress={handleLogin} style={styles.button}>
         <Text>Entrar</Text>
       </TouchableOpacity>
@@ -81,4 +90,15 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
   },
+  passwordContainer:{
+    flexDirection:"row",
+    alignItems:"center",
+    width:"100%",
+    borderBottomWidth:1,
+    paddingRight:10,
+  },
+  passwordInput:{
+    flex:1,
+    height:40,
+  }
 });
