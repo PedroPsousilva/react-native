@@ -2,6 +2,7 @@
 import Login from './screens/Login';
 import Cadastro from './screens/Cadastro';
 import CadastroIngressos from './screens/CadastroIngressos';
+import EventoScreens from './screens/EventoScreens';
 import CadastroEvento from './screens/CadastroEvento';
 import CadastroOrganizador from './screens/CadastroOrganizador';
 import Home from './screens/Home';
@@ -19,10 +20,10 @@ export default function App() {
     <NavigationContainer>
 
       <Stack.Navigator screenOptions={{headerShown:false}}>
-        <Stack.Screen name="TaskList"
+        {/* <Stack.Screen name="TaskList"
         component={TaskList} />
          <Stack.Screen name="TaskDetail"
-        component={TaskDetail} />
+        component={TaskDetail} /> */}
 
         <Stack.Screen name="Login" component={()=>(
           <Layout>
@@ -30,6 +31,12 @@ export default function App() {
           </Layout>
 
         )}/>
+        <Stack.Screen name="EventoScreens"> {()=>(
+          <Layout>
+            <EventoScreens/>
+          </Layout>
+
+        )}</Stack.Screen>
         <Stack.Screen name="Cadastro" component={()=>(
           <Layout>
             <Cadastro/>
