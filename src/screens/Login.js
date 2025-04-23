@@ -26,6 +26,7 @@ export default function Login() {
     await api.postLogin({ email: user.email, password: user.password }).then(
       (response) => {
         Alert.alert("OK", response.data.message);
+        navigation.navigate("EventoScreens")
       },
       (error) => {
         Alert.alert("Erro", error.response.data.error);
@@ -62,7 +63,7 @@ export default function Login() {
           />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity onPress={handleLogin} style={styles.button}>
+      <TouchableOpacity onPress={()=>navigation.navigate("EventoScreens")} style={styles.button}>
         <Text>Entrar</Text>
       </TouchableOpacity>
       <Button
