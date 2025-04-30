@@ -8,48 +8,73 @@ import {
   Modal,
   StyleSheet,
   ActivityIndicator,
+  TextInput,
+  Alert
 } from "react-native";
 
-
-export default function EventosScreens({ navigation }) {
+export default function EventosScreen() {
   const [eventos, setEventos] = useState([]);
   const [ingressos, setIngressos] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [eventoSelecionado, setEventoSelecionado] = useState('');
+  const [eventoSelecionado, setEventoSelecionado] = useState("");
+  const [mostrarForm, setMostrarForm] = useState(false);
+  const [novoIngresso, setNovoIngresso] = useState({ tipo: "", preco: "" });
+
+  async function criarIngresso() {
+    try {
+      const response = await api.createIngresso({
+        tipo: novoIngresso.tipo,
+        preco: novoIngresso.preco,
+        fk_id_evento: eventoSelecionado.id_evento,
+      });
+      Alert.alert(response.data.message);
+      console.log(response.data.message);
+
+      // Atualiza lista
+      const responseAtualizado = await api.getIngressosPorEvento(
+        eventoSelecionado.id_evento
+      );
+      setIngressos(responseAtualizado.data.ingressos);
+
+      // Limpa e esconde o formulário
+      setNovoIngresso({ tipo: "", preco: "" });
+      setMostrarForm(false);
+    } catch (error) {
+      console.log("Erro ao criar ingresso", error.response.data);
+      Alert.alert(error.response.data.error);
+    }
+  }
 
   useEffect(() => {
     getEventos();
-  },[]);
+  });
 
   async function getEventos() {
     try {
       const response = await api.getEventos();
-      console.log(response.data);
-      setEventos(response.data.events);
+      setEventos(response.data.eventos);
       setLoading(false);
     } catch (error) {
       console.log(error.response.data.error);
     }
   }
 
-  async function abrirModalComIngressos(evento){
-    setEventoSelecionado(evento)
+  async function abrirModalComIngressos(evento) {
+    setEventoSelecionado(evento);
     setModalVisible(true);
-    try{
+
+    try {
       const response = await api.getIngressosPorEvento(evento.id_evento);
       setIngressos(response.data.ingressos);
-      
-    }catch (error) {
-      console.log("Erro ao buscar ingressos", error.response);
-
+    } catch (error) {
+      console.log("Erro ao buscar Ingressos", error.response);
     }
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Eventos Disponiveis</Text>
-
+      <Text style={styles.title}>Eventos Disponíveis</Text>
       {loading ? (
         <ActivityIndicator size="large" color="blue" />
       ) : (
@@ -61,9 +86,9 @@ export default function EventosScreens({ navigation }) {
               style={styles.eventCard}
               onPress={() => abrirModalComIngressos(item)}
             >
-              <Text>{item.nome}</Text>
+              <Text style={styles.eventName}>{item.nome}</Text>
               <Text>{item.local}</Text>
-              <Text>{new Date(item.data_hora).toLocaleString}</Text>
+              <Text>{new Date(item.data_hora).toLocaleString()}</Text>
             </TouchableOpacity>
           )}
         />
@@ -74,26 +99,68 @@ export default function EventosScreens({ navigation }) {
         animationType="slide"
       >
         <View style={styles.modalContainer}>
-          <Text>Ingressos para:{eventoSelecionado.nome}</Text>
+          <Text>Ingressos para: {eventoSelecionado.nome}</Text>
           {ingressos.length === 0 ? (
-            <Text>Nenhum ingresso encontrado</Text>
+            <Text>Nenhum ingresso Encontrado</Text>
           ) : (
             <FlatList
               data={ingressos}
               keyExtractor={(item) => item.id_ingresso.toString()}
-              renderItem={({ item }) =>( 
-              <View style={styles.ingressoItem}> 
-                <Text>Tipo: {item.tipo}</Text>
-                <Text>Preço: R$ {item.preco}</Text>
-              </View>
-          )}
+              renderItem={({ item }) => (
+                <View style={styles.ingressoItem}>
+                  <Text>Tipo: {item.tipo}</Text>
+                  <Text>Preço: R${item.preco}</Text>
+                </View>
+              )}
             />
           )}
-          <TouchableOpacity style={styles.closeButton}
-          onPress={()=> setModalVisible(false)}>
-            <Text style={{ color: "white"}}>Fechar</Text>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={{ color: "white" }}>Fechar</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.closeButton, { backgroundColor: "green" }]}
+            onPress={() => setMostrarForm(!mostrarForm)}
+          >
+            <Text style={{ color: "white" }}>
+              {mostrarForm ? "Cancelar" : "Criar novo ingresso"}
+            </Text>
+          </TouchableOpacity>
+
+          {mostrarForm && (
+            <View style={{ marginTop: 20 }}>
+              <Text>Tipo do ingresso:</Text>
+              <TextInput
+                value={novoIngresso.tipo}
+                onChangeText={(text) =>
+                  setNovoIngresso({ ...novoIngresso, tipo: text })
+                }
+                style={styles.input}
+                placeholder="Ex: VIP, Meia, Inteira..."
+              />
+              <Text>Preço:</Text>
+              <TextInput
+                value={novoIngresso.preco}
+                onChangeText={(text) =>
+                  setNovoIngresso({ ...novoIngresso, preco: text })
+                }
+                keyboardType="numeric"
+                style={styles.input}
+                placeholder="Ex: 40.00"
+              />
+              <TouchableOpacity
+                style={[styles.closeButton, { backgroundColor: "purple" }]}
+                onPress={criarIngresso}
+              >
+                <Text style={{ color: "white" }}>Salvar ingresso</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
+        
       </Modal>
     </View>
   );
@@ -143,4 +210,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 6,
   },
+  input: {
+  borderWidth: 1,
+  borderColor: "#ccc",
+  borderRadius: 6,
+  padding: 10,
+  marginBottom: 10,
+  }
 });
