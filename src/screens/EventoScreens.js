@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import api from "../axios/axios";
 import {
   View,
@@ -9,8 +10,9 @@ import {
   StyleSheet,
   ActivityIndicator,
   TextInput,
-  Alert
+  Alert,
 } from "react-native";
+import * as SecureStore from "expo-secure-store";
 
 export default function EventosScreen() {
   const [eventos, setEventos] = useState([]);
@@ -48,11 +50,12 @@ export default function EventosScreen() {
 
   useEffect(() => {
     getEventos();
-  });
+  }, []);
 
   async function getEventos() {
     try {
       const response = await api.getEventos();
+
       setEventos(response.data.eventos);
       setLoading(false);
     } catch (error) {
@@ -71,9 +74,16 @@ export default function EventosScreen() {
       console.log("Erro ao buscar Ingressos", error.response);
     }
   }
-
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        onPress={() => {
+          navigation.navigate("CadastroEvento");
+        }}
+      >
+        <Text>Ciar novo evento</Text>
+      </TouchableOpacity>
       <Text style={styles.title}>Eventos Disponíveis</Text>
       {loading ? (
         <ActivityIndicator size="large" color="blue" />
@@ -160,7 +170,6 @@ export default function EventosScreen() {
             </View>
           )}
         </View>
-        
       </Modal>
     </View>
   );
@@ -211,10 +220,10 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   input: {
-  borderWidth: 1,
-  borderColor: "#ccc",
-  borderRadius: 6,
-  padding: 10,
-  marginBottom: 10,
-  }
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 6,
+    padding: 10,
+    marginBottom: 10,
+  },
 });

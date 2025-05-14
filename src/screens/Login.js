@@ -26,7 +26,7 @@ export default function Login() {
   async function saveToken(token) {
       //response.data
         await SecureStore.setItemAsync("token",token);
-        console.log(token);
+        
   }
 
   async function handleLogin() {
